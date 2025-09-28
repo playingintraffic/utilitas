@@ -15,16 +15,15 @@ local utilitas = {} -- Public interface
 
 --- @section Tables
 
---- List of known sub‑modules (no path or extension).
+--- List of known submodules (can be folders with init.lua or direct .lua files).
 local _modules = {
-    "callbacks",
+    "runtime",
     "debugging",
-    "geometry",
     "maths",
-    "methods",
     "strings",
     "tables",
-    "timestamps"
+    "timestamps",
+    "input"
 }
 
 --- Cache of already‑required modules.
@@ -33,13 +32,18 @@ local _cache = {} -- name -> module
 --- @section Internal Functions
 
 --- Require a module (or return cached version).
---- Also makes it available as `require("utilitas.<name>")`.
+--- Will load from utilitas.modules.<name>.init or <name>.lua
 --- @param name string: Module name without path.
 --- @return table: The loaded module.
 local function _load(name)
     local mod = _cache[name]
     if not mod then
-        mod = require("utilitas.modules." .. name)
+        local ok, result = pcall(require, "utilitas.modules." .. name .. ".init")
+        if not ok then
+            mod = require("utilitas.modules." .. name)
+        else
+            mod = result
+        end
         _cache[name] = mod
         package.loaded["utilitas." .. name] = mod
     end
@@ -57,7 +61,7 @@ end
 --- @section Loader Metatable
 
 setmetatable(utilitas, {
-    -- Lazy-load submodules (e.g. utilitas.geometry)
+    -- Lazy-load submodules (e.g. utilitas.maths)
     __index = function(_, key)
         if not _cache[key] and not table.find(_modules, key) then
             error(("utilitas: No module named '%s'"):format(key), 2)
@@ -66,17 +70,16 @@ setmetatable(utilitas, {
     end,
 
     -- Prevent assignment to the namespace
-    __newindex = function(_, key, value)
+    __newindex = function(_, key, _)
         error(("Attempted to assign to utilitas.%s after initialization"):format(key), 2)
     end,
 })
 
 --- @section Eager preload
 
--- Load all modules now (helps with autocompletion or preload optimizations).
+-- Load all modules
 for _, name in ipairs(_modules) do
     _load(name)
 end
 
---- @type table<string, table>
 return utilitas
