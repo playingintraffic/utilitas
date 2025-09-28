@@ -16,7 +16,7 @@ Drop it in **LÖVE**, **Defold**, your **home-brew engine**, or that one Lua scr
 * **debugging** - colour-coded logs that make you look more professional than you are.
 * **geometry** - everything from "is this point in a circle?" to "why am I writing my own collision again?".
 * **maths** - clamp, lerp, factorials, regression… it's like math class but without the trauma.
-* **methods** - an event/hook system so you can pretend your project supports "UGC".
+* **hooks** - an event/hook system so you can pretend your project supports "UGC".
 * **strings** - capitalize, split, trim, generate random garbage.
 * **tables** - deep copy, deep compare, recursive print, existential dread.
 * **timestamps** - add days, diff dates, convert UNIX time into something human.
@@ -95,14 +95,14 @@ local t = { foo = 1, bar = { baz = 2 } }
 local copy = tbl.deep_copy(t)
 log.info("Deep compare original vs copy", tbl.deep_compare(t, copy))
 
--- Methods (hook system)
+-- Hooks
 
-local methods = utilitas.methods
+local hooks = utilitas.hooks
 
-methods.add("player_jump", function(height)
+hooks.add("player_jump", function(height)
     log.debug("Player jumped", height .. "m")
 end)
-methods.trigger("player_jump", 2.5)
+hooks.trigger("player_jump", 2.5)
 
 -- Timestamps
 
